@@ -17,12 +17,14 @@ export async function GET(request: NextRequest) {
   const start = searchParams.get("start");
   const end = searchParams.get("end");
 
-  const where: any = { userId: user.id };
-  if (start || end) {
-    where.date = {};
-    if (start) where.date.gte = new Date(start);
-    if (end) where.date.lte = new Date(end);
-  }
+  const dateFilter: { gte?: Date; lte?: Date } = {};
+  if (start) dateFilter.gte = new Date(start);
+  if (end) dateFilter.lte = new Date(end);
+
+  const where = {
+    userId: user.id,
+    ...(Object.keys(dateFilter).length > 0 ? { date: dateFilter } : {}),
+  };
 
   const transactions = await prisma.transaction.findMany({
     where,

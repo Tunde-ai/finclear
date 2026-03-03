@@ -97,6 +97,7 @@ export async function POST(request: Request) {
   const startDate = ninetyDaysAgo.toISOString().split("T")[0];
   const endDate = now.toISOString().split("T")[0];
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allTransactions: any[] = [];
   let hasMore = true;
   let offset = 0;

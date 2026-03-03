@@ -6,7 +6,7 @@ import { AccountsActions } from "./accounts-actions";
 export default async function AccountsPage() {
   const { userId: clerkId } = await auth();
 
-  let accounts: any[] = [];
+  let accounts: { id: string; name: string; type: string; mask: string | null; currentBalance: unknown; availableBalance: unknown }[] = [];
   if (clerkId) {
     const user = await prisma.user.findUnique({ where: { clerkId } });
     if (user) {

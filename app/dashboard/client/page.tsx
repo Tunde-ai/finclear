@@ -7,7 +7,7 @@ import { ClientDashboardActions } from "./client-dashboard-actions";
 export default async function ClientDashboardPage() {
   const { userId: clerkId } = await auth();
 
-  let accounts: any[] = [];
+  let accounts: { id: string; currentBalance: unknown }[] = [];
   let totalBalance = 0;
   let monthlyIncome = 0;
   let monthlyExpenses = 0;

@@ -4,7 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import { DocumentList } from "@/components/documents/document-list";
 
 export function AccountantDocumentsClient() {
-  const [documents, setDocuments] = useState<any[]>([]);
+  const [documents, setDocuments] = useState<{
+    id: string; name: string; size: number; mimeType: string;
+    parsedStatus: string; syncStatus: string | null; createdAt: string;
+    user?: { firstName: string | null; lastName: string | null; email: string };
+  }[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchDocuments = useCallback(async () => {

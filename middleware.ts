@@ -10,6 +10,8 @@ const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isClientRoute = createRouteMatcher(["/dashboard/client(.*)"]);
 const isAccountantRoute = createRouteMatcher(["/dashboard/accountant(.*)"]);
 const isDashboardRoot = createRouteMatcher(["/dashboard"]);
+const isSharedDashboardRoute = createRouteMatcher(["/dashboard/jamaica-house(.*)"]);
+
 
 export default clerkMiddleware(async (auth, req) => {
   // 1. Unauthenticated + protected route → sign in
@@ -45,13 +47,18 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.redirect(url);
   }
 
-  // 5. CLIENT hitting /dashboard/accountant/* → redirect to client dashboard
+  // 5. Allow shared dashboard routes for any role
+  if (isSharedDashboardRoute(req)) {
+    return NextResponse.next();
+  }
+
+  // 6. CLIENT hitting /dashboard/accountant/* → redirect to client dashboard
   if (role === "CLIENT" && isAccountantRoute(req)) {
     url.pathname = "/dashboard/client";
     return NextResponse.redirect(url);
   }
 
-  // 6. ACCOUNTANT hitting /dashboard/client/* → redirect to accountant dashboard
+  // 7. ACCOUNTANT hitting /dashboard/client/* → redirect to accountant dashboard
   if (role === "ACCOUNTANT" && isClientRoute(req)) {
     url.pathname = "/dashboard/accountant";
     return NextResponse.redirect(url);

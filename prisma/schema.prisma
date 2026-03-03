@@ -32,6 +32,13 @@ model User {
   organizationMembers   OrganizationMember[]
   documents             Document[]
   googleDriveConnection GoogleDriveConnection?
+  reports               Report[]
+  transactionNotes      TransactionNote[]
+  sentMessages          Message[]
+  transactionFlags      TransactionFlag[]
+  marketSales           MarketSale[]
+  costEntries           CostEntry[]
+  adSpends              AdSpend[]
 }
 
 model Organization {
@@ -43,7 +50,8 @@ model Organization {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  members OrganizationMember[]
+  members  OrganizationMember[]
+  messages Message[]
 
   @@index([ownerId])
 }
@@ -113,6 +121,9 @@ model Transaction {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
+  transactionNotes TransactionNote[]
+  flag             TransactionFlag?
+
   @@index([userId])
   @@index([accountId])
   @@index([date])
@@ -175,8 +186,9 @@ model Subscription {
 
 enum SubscriptionPlan {
   FREE
-  PRO
-  ENTERPRISE
+  STARTER
+  PROFESSIONAL
+  BUSINESS
 }
 
 enum SubscriptionStatus {
@@ -218,6 +230,159 @@ model Document {
 
   @@index([userId])
   @@index([googleDriveFileId])
+}
+
+enum ReportType {
+  MONTHLY_PL
+  TAX_DEDUCTIONS
+  CASH_FLOW_FORECAST
+  BUSINESS_HEALTH_SCORE
+}
+
+enum ReportStatus {
+  GENERATING
+  COMPLETED
+  FAILED
+}
+
+model Report {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      ReportType
+  status    ReportStatus @default(GENERATING)
+  title     String
+  content   String       @db.Text
+  metadata  Json?
+  error     String?
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  sharedLinks SharedReportLink[]
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([createdAt])
+}
+
+// ── Collaboration Models ──
+
+model TransactionNote {
+  id            String   @id @default(cuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content       String   @db.Text
+  parentId      String?
+  parent        TransactionNote?  @relation("NoteThread", fields: [parentId], references: [id])
+  replies       TransactionNote[] @relation("NoteThread")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([transactionId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  content        String       @db.Text
+  readBy         Json         @default("[]")
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+  @@index([senderId])
+}
+
+enum TransactionFlagStatus {
+  NEEDS_REVIEW
+  APPROVED
+}
+
+model TransactionFlag {
+  id            String                @id @default(cuid())
+  transactionId String                @unique
+  transaction   Transaction           @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  status        TransactionFlagStatus
+  flaggedBy     String
+  user          User                  @relation(fields: [flaggedBy], references: [id])
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([flaggedBy])
+}
+
+model SharedReportLink {
+  id        String    @id @default(cuid())
+  reportId  String
+  report    Report    @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  expiresAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([token])
+}
+
+// ── Jamaica House Brand Models ──
+
+model MarketSale {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime
+  location    String
+  product     String
+  quantity    Int
+  unitPrice   Decimal  @db.Decimal(10, 2)
+  totalSale   Decimal  @db.Decimal(10, 2)
+  saleType    String   @default("RETAIL")
+  vendorFee   Decimal? @db.Decimal(10, 2)
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([date])
+  @@index([location])
+}
+
+model CostEntry {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime
+  supplier    String
+  item        String
+  quantity    Decimal  @db.Decimal(10, 2)
+  unitCost    Decimal  @db.Decimal(10, 2)
+  totalCost   Decimal  @db.Decimal(10, 2)
+  category    String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([date])
+}
+
+model AdSpend {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime
+  platform    String
+  campaign    String?
+  spend       Decimal  @db.Decimal(10, 2)
+  impressions Int?
+  clicks      Int?
+  conversions Int?
+  revenue     Decimal? @db.Decimal(10, 2)
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([date])
 }
 
 model GoogleDriveConnection {

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "nextjs",
+  "buildCommand": "npx prisma generate && next build",
+  "regions": ["iad1"],
+  "functions": {
+    "app/api/reports/generate/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/reports/[id]/pdf/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/reports/generate",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
+      ]
+    }
+  ]
+}
