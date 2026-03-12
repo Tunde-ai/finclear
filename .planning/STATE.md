@@ -2,8 +2,8 @@
 
 ## Current Position
 - **Phase:** 01-production-configuration
-- **Current Plan:** 01-01 (paused at Task 2 checkpoint — human-action required)
-- **Last Work:** Fixed prisma.config.ts DIRECT_URL bug + updated DEPLOY.md (2026-03-12)
+- **Current Plan:** 01-02
+- **Last Work:** Completed 01-01 — all external services configured, prisma.config.ts fixed (2026-03-12)
 - **Milestone:** v1.0
 
 ## What's Done
@@ -21,13 +21,13 @@
 - Vercel deployment configured
 - **[01-01]** prisma.config.ts fixed to use DIRECT_URL for migrations (PgBouncer DDL fix)
 - **[01-01]** DEPLOY.md updated with DIRECT_URL references and migration guidance
+- **[01-01]** All production services configured: Stripe (3 products + webhook + portal), Clerk (webhook), Resend (pending domain verify), Plaid (sandbox, production pending), all 29 Vercel env vars set
 
 ## What's Next
-- Configure all env vars in Vercel production
-- Set up Stripe products and webhooks
-- Set up Clerk webhooks
-- Verify Resend domain
-- Run database migrations against production
+- Run database migrations against production Supabase (01-02)
+- Deploy to Vercel and verify production URL (01-02)
+- Confirm Resend domain verification completes
+- Update Plaid to production credentials when access is approved
 - End-to-end testing on live URL
 - Performance optimization
 
@@ -37,10 +37,12 @@
 - SSE streaming for AI reports (not WebSockets)
 - Separate Jamaica House module for food brand tracking
 - **[01-01]** Prisma CLI uses DIRECT_URL (non-pooled) for migrations; runtime client uses DATABASE_URL (pooled) — PgBouncer in transaction mode rejects DDL
+- **[01-01]** Plaid configured with sandbox credentials pending production access approval — must update PLAID_SECRET + PLAID_ENV=production when Plaid grants access
+- **[01-01]** Google Drive integration deferred to a later phase
 
 ## Blockers
-- **[01-01 Task 2]** External service configuration required: Stripe products + webhook, Clerk webhook, Resend domain, Plaid production creds, all 29 Vercel env vars. User must complete and type "configured" to resume.
+None — 01-01 complete. Soft follow-ups: Resend domain verification, Plaid production access.
 
 ## Session Continuity
 - Initialized: 2026-03-04
-- Last session: 2026-03-12 — Stopped at 01-01 Task 2 (human-action checkpoint)
+- Last session: 2026-03-12 — Completed 01-01, ready for 01-02
