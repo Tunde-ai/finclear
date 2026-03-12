@@ -16,7 +16,8 @@ Add all of these in **Vercel > Project Settings > Environment Variables**:
 
 ### Database
 ```
-DATABASE_URL=postgresql://user:pass@host:5432/finclear?sslmode=require
+DATABASE_URL=postgresql://user:pass@pooler-host:6543/finclear?sslmode=require
+DIRECT_URL=postgresql://user:pass@direct-host:5432/finclear?sslmode=require
 ```
 
 ### Clerk Authentication
@@ -61,7 +62,7 @@ ANTHROPIC_API_KEY=sk-ant-...
 ### Resend (Email Notifications)
 ```
 RESEND_API_KEY=re_...
-RESEND_FROM_EMAIL=FinClear <notifications@yourdomain.com>
+RESEND_FROM_EMAIL=FinClear <notifications@finclear.app>
 ```
 
 ### Google Drive (Optional)
@@ -87,12 +88,14 @@ ENCRYPTION_KEY=<64-character hex string>
 
 ### Run migrations against production database:
 ```bash
-DATABASE_URL="your-production-url" npx prisma migrate deploy
+DIRECT_URL="your-production-direct-url" npx prisma migrate deploy
 ```
+
+> **Note:** `DIRECT_URL` must be the non-pooled (direct) Supabase connection string. `DATABASE_URL` is the pooled connection used at runtime by the app. Migrations require `DIRECT_URL` because PgBouncer (transaction mode) does not support the DDL commands that Prisma migrations execute.
 
 ### (Optional) Seed demo data:
 ```bash
-DATABASE_URL="your-production-url" npx tsx prisma/seed.ts
+DIRECT_URL="your-production-direct-url" npx tsx prisma/seed.ts
 ```
 
 ---
