@@ -11,6 +11,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
     "@clerk/nextjs": "^6.39.0",
+    "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.4",
@@ -22,6 +23,7 @@
     "lucide-react": "^0.576.0",
     "next": "14.2.35",
     "pdf-parse": "^2.4.5",
+    "pg": "^8.19.0",
     "plaid": "^41.3.0",
     "prisma": "^7.4.2",
     "react": "^18",
@@ -37,6 +39,7 @@
   "devDependencies": {
     "@types/node": "^20",
     "@types/pdf-parse": "^1.1.5",
+    "@types/pg": "^8.18.0",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",
