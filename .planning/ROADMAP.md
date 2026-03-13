@@ -19,6 +19,14 @@ Plans:
 
 ### Phase 2: Production Testing ⬜
 **Goal:** Verify all features work end-to-end on live URL
+**Plans:** 4 plans
+
+Plans:
+- [ ] 02-01-PLAN.md -- Auth/onboarding flow + Jamaica House module verification
+- [ ] 02-02-PLAN.md -- Plaid bank connection, transaction sync, and document upload
+- [ ] 02-03-PLAN.md -- AI report generation, PDF export, share links, and Stripe checkout
+- [ ] 02-04-PLAN.md -- Collaboration features (notes, messages, flags) and Resend email verification
+
 - Auth flow (signup, login, role assignment, onboarding)
 - Plaid bank connection and transaction sync
 - AI report generation and PDF export
