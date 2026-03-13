@@ -1,9 +1,9 @@
 # FinClear - Project State
 
 ## Current Position
-- **Phase:** 01-production-configuration
-- **Current Plan:** 01-02
-- **Last Work:** Completed 01-01 — all external services configured, prisma.config.ts fixed (2026-03-12)
+- **Phase:** 02-onboarding (Phase 01 complete)
+- **Current Plan:** 01-02 (last plan in Phase 01)
+- **Last Work:** Completed 01-02 — production database migrated, Vercel live at https://finclear.app, all pages verified (2026-03-13)
 - **Milestone:** v1.0
 
 ## What's Done
@@ -22,13 +22,13 @@
 - **[01-01]** prisma.config.ts fixed to use DIRECT_URL for migrations (PgBouncer DDL fix)
 - **[01-01]** DEPLOY.md updated with DIRECT_URL references and migration guidance
 - **[01-01]** All production services configured: Stripe (3 products + webhook + portal), Clerk (webhook), Resend (pending domain verify), Plaid (sandbox, production pending), all 29 Vercel env vars set
+- **[01-02] PHASE 01 COMPLETE** — Production database migrated, Vercel deployment live at https://finclear.app, landing/pricing/sign-in pages all verified healthy
 
 ## What's Next
-- Run database migrations against production Supabase (01-02)
-- Deploy to Vercel and verify production URL (01-02)
-- Confirm Resend domain verification completes
-- Update Plaid to production credentials when access is approved
-- End-to-end testing on live URL
+- End-to-end user testing on live production URL (Phase 02)
+- Onboarding flow verification on https://finclear.app
+- Confirm Resend domain verification completes (soft blocker for email)
+- Update Plaid to production credentials when access is approved (soft blocker for live bank connections)
 - Performance optimization
 
 ## Key Decisions
@@ -39,10 +39,13 @@
 - **[01-01]** Prisma CLI uses DIRECT_URL (non-pooled) for migrations; runtime client uses DATABASE_URL (pooled) — PgBouncer in transaction mode rejects DDL
 - **[01-01]** Plaid configured with sandbox credentials pending production access approval — must update PLAID_SECRET + PLAID_ENV=production when Plaid grants access
 - **[01-01]** Google Drive integration deferred to a later phase
+- **[01-02]** Prisma runtime client uses @prisma/adapter-pg for Vercel Edge + PgBouncer compatibility
+- **[01-02]** Production DB baselined via `prisma migrate resolve --applied` (schema was already in sync — no DDL re-run needed)
 
 ## Blockers
-None — 01-01 complete. Soft follow-ups: Resend domain verification, Plaid production access.
+None — Phase 01 complete. Soft follow-ups: Resend domain verification, Plaid production access.
 
 ## Session Continuity
 - Initialized: 2026-03-04
-- Last session: 2026-03-12 — Completed 01-01, ready for 01-02
+- Last session: 2026-03-13 — Completed 01-02, Phase 01 complete, production live at https://finclear.app
+- Stopped at: Completed 01-02-PLAN.md
