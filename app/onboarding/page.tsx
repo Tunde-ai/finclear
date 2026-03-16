@@ -41,6 +41,7 @@ export default function OnboardingPage() {
     "CLIENT" | "ACCOUNTANT" | null
   >(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { user } = useUser();
 
@@ -48,6 +49,7 @@ export default function OnboardingPage() {
     if (!selectedRole) return;
 
     setIsLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/auth/set-role", {
         method: "POST",
@@ -55,7 +57,10 @@ export default function OnboardingPage() {
         body: JSON.stringify({ role: selectedRole }),
       });
 
-      if (!res.ok) throw new Error("Failed to set role");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Failed to set role (${res.status})`);
+      }
 
       // Reload the user to get updated metadata in the session
       await user?.reload();
@@ -65,7 +70,9 @@ export default function OnboardingPage() {
           ? "/dashboard/accountant"
           : "/dashboard/client"
       );
-    } catch {
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Something went wrong";
+      setError(message);
       setIsLoading(false);
     }
   }
@@ -134,6 +141,12 @@ export default function OnboardingPage() {
             );
           })}
         </div>
+
+        {error && (
+          <div className="mx-auto max-w-xs rounded-lg bg-red-50 border border-red-200 p-3 text-center text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <div className="flex justify-center">
           <Button
