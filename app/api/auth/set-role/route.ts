@@ -9,11 +9,13 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { role } = body;
+  const rawRole = typeof body.role === "string" ? body.role.toUpperCase().trim() : "";
 
-  if (role !== "CLIENT" && role !== "ACCOUNTANT") {
+  if (rawRole !== "CLIENT" && rawRole !== "ACCOUNTANT") {
     return NextResponse.json({ error: "Invalid role" }, { status: 400 });
   }
+
+  const role = rawRole as "CLIENT" | "ACCOUNTANT";
 
   const clerk = await clerkClient();
 
