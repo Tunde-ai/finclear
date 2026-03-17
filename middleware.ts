@@ -1,4 +1,4 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isProtectedRoute = createRouteMatcher([
@@ -19,13 +19,27 @@ export default clerkMiddleware(async (auth, req) => {
     await auth.protect();
   }
 
+  const { userId } = await auth();
+  const url = req.nextUrl.clone();
+
+  // Get role from session claims first (fast path)
   const { sessionClaims } = await auth();
-  const role = sessionClaims?.metadata?.role as
+  let role = sessionClaims?.metadata?.role as
     | "CLIENT"
     | "ACCOUNTANT"
     | undefined;
 
-  const url = req.nextUrl.clone();
+  // If no role in session claims but user is authenticated,
+  // check publicMetadata directly (handles stale JWT after set-role)
+  if (!role && userId) {
+    try {
+      const clerk = await clerkClient();
+      const user = await clerk.users.getUser(userId);
+      role = user.publicMetadata?.role as "CLIENT" | "ACCOUNTANT" | undefined;
+    } catch {
+      // If Clerk API fails, fall through with no role
+    }
+  }
 
   // 2. No role + not on /onboarding → redirect to onboarding
   if (!role && isProtectedRoute(req) && !isOnboardingRoute(req)) {
