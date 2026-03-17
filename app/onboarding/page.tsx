@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -42,7 +41,7 @@ export default function OnboardingPage() {
   >(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [status, setStatus] = useState<string>("");
   const { user } = useUser();
 
   async function handleContinue() {
@@ -50,6 +49,8 @@ export default function OnboardingPage() {
 
     setIsLoading(true);
     setError(null);
+    setStatus("Calling API...");
+
     try {
       const res = await fetch("/api/auth/set-role", {
         method: "POST",
@@ -57,22 +58,35 @@ export default function OnboardingPage() {
         body: JSON.stringify({ role: selectedRole }),
       });
 
+      setStatus(`API responded: ${res.status}`);
+
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error || `Failed to set role (${res.status})`);
       }
 
-      // Reload the user to get updated metadata in the session
-      await user?.reload();
+      setStatus("Role set. Reloading session...");
 
-      router.push(
+      // Reload the user to get updated metadata in the session
+      try {
+        await user?.reload();
+      } catch {
+        // If reload fails, still redirect — Clerk will pick up the metadata
+      }
+
+      setStatus("Redirecting...");
+
+      const dest =
         selectedRole === "ACCOUNTANT"
           ? "/dashboard/accountant"
-          : "/dashboard/client"
-      );
+          : "/dashboard/client";
+
+      // Use window.location as fallback — router.push can silently fail
+      window.location.href = dest;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Something went wrong";
       setError(message);
+      setStatus("");
       setIsLoading(false);
     }
   }
@@ -148,13 +162,19 @@ export default function OnboardingPage() {
           </div>
         )}
 
+        {status && !error && (
+          <div className="mx-auto max-w-xs text-center text-sm text-gray-500">
+            {status}
+          </div>
+        )}
+
         <div className="flex justify-center">
           <Button
             className="w-full max-w-xs bg-emerald-600 hover:bg-emerald-700"
             disabled={!selectedRole || isLoading}
             onClick={handleContinue}
           >
-            {isLoading ? "Setting up..." : "Continue"}
+            {isLoading ? status || "Setting up..." : "Continue"}
           </Button>
         </div>
       </div>
