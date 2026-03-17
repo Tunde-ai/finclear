@@ -11,36 +11,42 @@ export default async function ClientDashboardPage() {
   let totalBalance = 0;
   let monthlyIncome = 0;
   let monthlyExpenses = 0;
+  let dbError: string | null = null;
 
   if (clerkId) {
-    const user = await prisma.user.findUnique({ where: { clerkId } });
-    if (user) {
-      accounts = await prisma.account.findMany({
-        where: { userId: user.id, isActive: true },
-      });
+    try {
+      const user = await prisma.user.findUnique({ where: { clerkId } });
+      if (user) {
+        accounts = await prisma.account.findMany({
+          where: { userId: user.id, isActive: true },
+        });
 
-      totalBalance = accounts.reduce(
-        (sum, a) => sum + Number(a.currentBalance),
-        0
-      );
+        totalBalance = accounts.reduce(
+          (sum, a) => sum + Number(a.currentBalance),
+          0
+        );
 
-      const now = new Date();
-      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-      const transactions = await prisma.transaction.findMany({
-        where: {
-          userId: user.id,
-          date: { gte: startOfMonth },
-        },
-      });
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const transactions = await prisma.transaction.findMany({
+          where: {
+            userId: user.id,
+            date: { gte: startOfMonth },
+          },
+        });
 
-      for (const tx of transactions) {
-        const amt = Number(tx.amount);
-        if (amt < 0) {
-          monthlyIncome += Math.abs(amt);
-        } else {
-          monthlyExpenses += amt;
+        for (const tx of transactions) {
+          const amt = Number(tx.amount);
+          if (amt < 0) {
+            monthlyIncome += Math.abs(amt);
+          } else {
+            monthlyExpenses += amt;
+          }
         }
       }
+    } catch (err) {
+      console.error("[dashboard/client] DB error:", err);
+      dbError = err instanceof Error ? err.message : "Database connection failed";
     }
   }
 
@@ -52,6 +58,12 @@ export default async function ClientDashboardPage() {
         <h2 className="text-2xl font-bold text-gray-900">Dashboard</h2>
         {!hasAccounts && <ClientDashboardActions />}
       </div>
+
+      {dbError && (
+        <div className="rounded-lg bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+          <strong>Database error:</strong> {dbError}
+        </div>
+      )}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
